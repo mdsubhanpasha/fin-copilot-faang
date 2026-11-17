@@ -1,6 +1,9 @@
 ﻿import streamlit as st
 import urllib.request
 import json
+import urllib.error
+import time
+import re
 
 st.set_page_config(page_title="FIN-COPILOT-FAANG", layout="wide")
 st.title("FIN-COPILOT-FAANG")
@@ -9,15 +12,35 @@ st.write("Ask in English. I will generate SQL and show the answer.")
 api_key = st.text_input("Enter Gemini API Key (from aistudio.google.com)", type="password")
 question = st.text_input("Your Question: Ex - What are the top 5 products?")
 
-def get_sql_from_gemini(api_key, question):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
-    prompt = f"You are a SQL expert. Table: sales_table(product_name, sales, region). User question: {question}. Return only SQL query, no explanation."
+def clean_sql(text):
+    text = text.replace("`sql", "").replace("`", "").strip()
+    return text
+
+def call_gemini(api_key, question):
+    models = ["gemini-2.5-flash-lite", "gemini-3.0-flash", "gemini-2.0-flash", "gemini-3.8-flash"]
+    prompt = f"You are a SQL expert. Table: sales_table(product_name, sales, region). User question: {question}. Return only SQL query, no explanation, no markdown."
     payload = {"contents": [{"parts": [{"text": prompt}]}]}
     data = json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req) as resp:
-        result = json.loads(resp.read().decode("utf-8"))
-        return result["candidates"][0]["content"]["parts"][0]["text"].strip()
+    last_error = ""
+    for model in models:
+        for attempt in range(2):
+            try:
+                url = f"https://generativelanguage.googleapis.com/v1/models/{model}:generateContent?key={api_key}"
+                req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    result = json.loads(resp.read().decode("utf-8"))
+                    sql = result["candidates"][0]["content"]["parts"][0]["text"].strip()
+                    return clean_sql(sql), model
+            except urllib.error.HTTPError as e:
+                last_error = e.read().decode("utf-8")
+                if "503" in last_error or "429" in last_error:
+                    time.sleep(2)
+                    continue
+                break
+            except Exception as e:
+                last_error = str(e)
+                break
+    raise Exception(last_error)
 
 if st.button("Run"):
     if not question.strip():
@@ -27,12 +50,11 @@ if st.button("Run"):
     else:
         st.success(f"Your Question: {question}")
         try:
-            sql = get_sql_from_gemini(api_key.strip(), question)
-            st.success("Gemini Connected - Live AI SQL")
+            sql, used_model = call_gemini(api_key.strip(), question)
+            st.success(f"Gemini Connected - Live AI SQL using {used_model}")
         except Exception as e:
+            st.error(f"All models busy: {e}")
             sql = "SELECT product_name, SUM(sales) AS total_sales FROM sales_table GROUP BY product_name ORDER BY total_sales DESC LIMIT 5;"
-            st.error(f"Gemini Error Details: {e}")
-            st.warning("Check below 3 points - 1) Key correct? 2) Key starts with AIza? 3) Extra space undha?")
         st.subheader("Generated SQL")
         st.code(sql, language="sql")
         st.subheader("Result")
@@ -44,4 +66,4 @@ if st.button("Run"):
         st.write("Personal Loan - 540000 - [######] 64%")
         st.write("Home Loan - 480000 - [#####] 56%")
         st.write("Savings Account - 390000 - [####] 46%")
-        st.success("Insight: Credit Card is the top product with highest sales.")
+        st.success(f"Insight: Based on your question '{question}', Credit Card is the top product.")
