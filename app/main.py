@@ -1,4 +1,4 @@
-import streamlit as st
+ï»¿import streamlit as st
 
 st.set_page_config(page_title="FIN-COPILOT-FAANG", layout="centered")
 st.title("FIN-COPILOT-FAANG")
@@ -21,9 +21,9 @@ if st.button("Run"):
         st.markdown("| Home Loan | 480000 | West |")
         st.markdown("| Savings Account | 390000 | East |")
         st.subheader("Top Products")
-        st.write("Credit Card - 850000 - ¦¦¦¦¦¦¦¦¦¦")
-        st.write("Debit Card - 620000 - ¦¦¦¦¦¦¦")
-        st.write("Personal Loan - 540000 - ¦¦¦¦¦¦")
-        st.write("Home Loan - 480000 - ¦¦¦¦¦")
-        st.write("Savings Account - 390000 - ¦¦¦¦")
+        st.write("Credit Card - 850000 - [##########] 100%")
+        st.write("Debit Card - 620000 - [#######] 73%")
+        st.write("Personal Loan - 540000 - [######] 64%")
+        st.write("Home Loan - 480000 - [#####] 56%")
+        st.write("Savings Account - 390000 - [####] 46%")
         st.success("Insight: Credit Card is the top product with highest sales.")
