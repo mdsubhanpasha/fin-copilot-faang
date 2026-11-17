@@ -10,7 +10,7 @@ api_key = st.text_input("Enter Gemini API Key (from aistudio.google.com)", type=
 question = st.text_input("Your Question: Ex - What are the top 5 products?")
 
 def get_sql_from_gemini(api_key, question):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
     prompt = f"You are a SQL expert. Table: sales_table(product_name, sales, region). User question: {question}. Return only SQL query, no explanation."
     payload = {"contents": [{"parts": [{"text": prompt}]}]}
     data = json.dumps(payload).encode("utf-8")
@@ -27,10 +27,12 @@ if st.button("Run"):
     else:
         st.success(f"Your Question: {question}")
         try:
-            sql = get_sql_from_gemini(api_key, question)
+            sql = get_sql_from_gemini(api_key.strip(), question)
+            st.success("Gemini Connected - Live AI SQL")
         except Exception as e:
             sql = "SELECT product_name, SUM(sales) AS total_sales FROM sales_table GROUP BY product_name ORDER BY total_sales DESC LIMIT 5;"
-            st.warning("Gemini API failed, showing default SQL. Check API Key.")
+            st.error(f"Gemini Error Details: {e}")
+            st.warning("Check below 3 points - 1) Key correct? 2) Key starts with AIza? 3) Extra space undha?")
         st.subheader("Generated SQL")
         st.code(sql, language="sql")
         st.subheader("Result")
