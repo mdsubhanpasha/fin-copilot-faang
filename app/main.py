@@ -1,6 +1,6 @@
 ﻿import streamlit as st
 
-st.set_page_config(page_title="FIN-COPILOT-FAANG", layout="centered")
+st.set_page_config(page_title="FIN-COPILOT-FAANG", layout="wide")
 st.title("FIN-COPILOT-FAANG")
 st.write("Ask in English. I will generate SQL and show the answer.")
 
@@ -13,13 +13,8 @@ if st.button("Run"):
         st.subheader("Generated SQL")
         st.code("SELECT product_name, SUM(sales) AS total_sales FROM sales_table GROUP BY product_name ORDER BY total_sales DESC LIMIT 5;", language="sql")
         st.subheader("Result")
-        st.markdown("| Product | Total Sales | Region |")
-        st.markdown("| --- | --- | --- |")
-        st.markdown("| Credit Card | 850000 | South |")
-        st.markdown("| Debit Card | 620000 | North |")
-        st.markdown("| Personal Loan | 540000 | South |")
-        st.markdown("| Home Loan | 480000 | West |")
-        st.markdown("| Savings Account | 390000 | East |")
+        table_text = "| Product | Total Sales | Region |\n| --- | --- | --- |\n| Credit Card | 850000 | South |\n| Debit Card | 620000 | North |\n| Personal Loan | 540000 | South |\n| Home Loan | 480000 | West |\n| Savings Account | 390000 | East |"
+        st.markdown(table_text)
         st.subheader("Top Products")
         st.write("Credit Card - 850000 - [##########] 100%")
         st.write("Debit Card - 620000 - [#######] 73%")
