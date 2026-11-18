@@ -1,0 +1,16 @@
+<!DOCTYPE html><html><head><title>FIN-COPILOT</title></head>
+<body style="font-family:Arial; text-align:center; padding:20px;">
+<h1>FIN-COPILOT - 100% Working</h1>
+<h2 id="total">Loading...</h2>
+<canvas id="myChart" style="max-width:600px; margin:20px auto;"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+async function load(){
+  const s = await (await fetch("/api/summary")).json();
+  document.getElementById("total").innerText = "Total: Rs." + s.total + " | Count: " + s.count + " | " + s.status;
+  const c = await (await fetch("/api/chart")).json();
+  new Chart(document.getElementById("myChart"), {type:"bar", data:{labels:c.labels, datasets:[{label:"Monthly Total", data:c.data}]}});
+}
+load();
+</script>
+</body></html>
